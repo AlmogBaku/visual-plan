@@ -83,6 +83,25 @@ name changed during the work. Say what a thing **is** before what it **does**. `
 
 ## Steps
 
+**Who does what.** The page is built in a subagent, so the main context keeps the design and the
+conversation, not the YAML, the HTML, or the lint rounds. When the runtime has subagents (Claude Code: the
+Agent tool; Codex: a spawned agent), the main session does steps 1, 6, 7 and 8 and gives steps 2 to 5 to
+one **page builder**:
+
+- **It receives** the brief's content, not a draft page: the opening, the problem and today's parts it
+  replaces (with file references), the design parts and how they connect, the decisions (settled, and open
+  with their options and the recommendation), the goal, the scope, the retired terms, the output path, and
+  this skill's directory.
+- **It does** steps 2 to 5: reads `references/`, writes `plan.yaml`, packs, and fixes every lint error
+  itself until the pack reports 0 errors.
+- **It returns** only the path to `plan.html`, the titles of the open decisions, the lint result, and at
+  most 150 words, plus any question it cannot settle from what it received. Never the YAML or the HTML.
+- **The main session never opens** `plan.yaml` or `plan.html`. A Respond message is answered in chat
+  first; then the main session sends the edit list to the page builder (the same one when the runtime can
+  resume it, else a new one with the content file's path), which repacks and returns the same short report.
+
+A runtime without subagents does steps 2 to 5 inline.
+
 1. **Read first.** The current code the change touches, the platform's own documentation for every
    mechanism the plan names, in the platform's own words (never invent a mechanism the platform does not
    have), and the person's earlier choices. A mechanism you are about to drop: read its code before you call it a leftover.

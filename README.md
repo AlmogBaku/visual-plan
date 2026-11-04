@@ -30,6 +30,7 @@ the lock, as a separate document.
 - **Only your decisions, as controls.** Each open decision has its context, one-line options with the recommendation first, and a panel per option (how, gains, costs, effort, reversible). Nothing is preselected.
 - **Respond and Lock.** One button returns every pick, struck row, and comment as a single markdown message. The Lock button appears only when no decision is open.
 - **Plain words, linted.** Prose follows ASD-STE100 Simplified Technical English, and the pack checks it, along with "no code in the plan" and retired terms.
+- **Built in a subagent.** The page builder writes, packs, and lints the page in its own context and returns only a path and the open decisions, so your main session stays clean.
 - **One file.** The output is one self-contained `plan.html`: no network, no build, no framework. Open it from disk, host it anywhere, or drop it into an artifact.
 - **Design, not tasks.** Built around the target state. No task lists, no code sketches, no who-does-what.
 
@@ -61,10 +62,15 @@ Ask your agent for it by name, in the session where you are designing a change:
 make a visual plan for moving auth to the new gateway
 ```
 
-The agent reads the code the change touches, writes `plan.yaml`, packs it, and hands you the page with
-the list of open decisions. You pick options and leave comments on the page, press **Respond**, and paste
+The agent reads the code the change touches and settles what the page will say. Then a **subagent** (the
+page builder) writes `plan.yaml`, packs it, and fixes every lint error, and hands back only the path and
+the list of open decisions. The YAML, the HTML, and the lint rounds never enter your main session's
+context. You pick options and leave comments on the page, press **Respond**, and paste
 the markdown it gives you back into the chat; the agent answers there first, then updates the page. When
 nothing is open, you lock it, and only then does the implementation plan get written.
+
+> [!NOTE]
+> On the bundled example, the page builder reads and writes about 15k tokens (references plus the content file) and returns about 0.2k. Runtimes without subagents build the page inline.
 
 > [!TIP]
 > Planning skills can call it too. Any skill that wants an interactive brief can ask visual-plan for the page and name where the locked HTML is saved.
