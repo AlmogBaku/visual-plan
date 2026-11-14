@@ -18,7 +18,8 @@ For each block: what it holds, and the mistake it exists to prevent.
 ### opening
 What: the name of the change and the place, 3 to 7 words, as the title. Then 2 to 4 sentences: what the
 system does, what was selected or decided before this page, what this page is. When the code is new,
-say "from scratch" and what it is not a refactor of.
+say "from scratch" and what it is not a refactor of. Put a line break between points that the reader
+must keep apart, for example what the system does and what this page is.
 Prevents: a reader who takes a rebuild for a port, or a port for a refactor.
 
 ### problem

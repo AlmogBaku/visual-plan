@@ -20,39 +20,49 @@
   }
   function card(key, inner, label) { return '<div class="card">' + commentBtn(key, label || strip(inner).slice(0, 60)) + inner + '</div>'; }
   function strip(h) { var t = document.createElement('div'); t.innerHTML = h; return (t.textContent || '').replace(/\s+/g, ' ').trim(); }
-  function list(items) { return '<ul>' + items.map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul>'; }
+  function list(items) { return '<ul>' + items.map(function (i) { return '<li>' + nl(i) + '</li>'; }).join('') + '</ul>'; }
+  // A newline the author writes in a text field is a line break on the page. Not inside <pre>, and not
+  // next to a block tag, so HTML written over several lines renders as before.
+  var BLOCKTAG = '(?:p|div|ul|ol|li|table|tr|td|th|dl|dt|dd|h[1-6]|section|pre|br)\\b';
+  var AFTER_BLOCK = new RegExp('(<\\/?' + BLOCKTAG + '[^>]*>)(?:<br>)+', 'gi'), BEFORE_BLOCK = new RegExp('(?:<br>)+(?=<\\/?' + BLOCKTAG + ')', 'gi');
+  function nl(s) {
+    if (s == null) return '';
+    return String(s).split(/(<pre[\s\S]*?<\/pre>)/i).map(function (part, i) {
+      return i % 2 ? part : part.replace(/[ \t]*\n[ \t]*/g, '<br>').replace(AFTER_BLOCK, '$1').replace(BEFORE_BLOCK, '');
+    }).join('').replace(/^(?:<br>)+|(?:<br>)+$/g, '');
+  }
 
   function renderBlock(b, i) {
     var id = b.id || b.kind + (b.kind === 'section' ? i : '');
     var title = b.title || KIND_TITLES[b.kind] || '';
-    var h = '<section class="block" id="' + esc(id) + '">' + (title ? '<h2 class="sec">' + title + '</h2>' : '') + (b.sub ? '<p class="sub">' + b.sub + '</p>' : '');
+    var h = '<section class="block" id="' + esc(id) + '">' + (title ? '<h2 class="sec">' + title + '</h2>' : '') + (b.sub ? '<p class="sub">' + nl(b.sub) + '</p>' : '');
     switch (b.kind) {
       case 'problem':
-        h += '<div class="grid2">' + card(id + '/problem', '<h3>Problem</h3><p>' + b.problem + '</p>') +
+        h += '<div class="grid2">' + card(id + '/problem', '<h3>Problem</h3><p>' + nl(b.problem) + '</p>') +
              card(id + '/today', '<h3>' + esc(b.today.label || 'How it works today') + '</h3>' + list(b.today.items)) + '</div>';
         break;
       case 'map':
         h += '<div class="crumbs" id="crumbs"></div><div class="stage"><div id="overview"><div class="ov" data-scroll="scroll sideways →"></div><div class="hint">' +
              (b.legend || []).map(function (k) { return '<span class="key"><i class="' + esc(k[0]) + '"></i>' + esc(k[1]) + '</span>'; }).join('') +
-             (b.note ? '<span>' + b.note + '</span>' : '') + '</div></div><div class="detail" id="detail" hidden></div></div>' +
-             (b.walkthrough ? '<p class="sub" style="margin-top:10px"><b>In two lines:</b> ' + b.walkthrough + '</p>' : '');
+             (b.note ? '<span>' + nl(b.note) + '</span>' : '') + '</div></div><div class="detail" id="detail" hidden></div></div>' +
+             (b.walkthrough ? '<p class="sub" style="margin-top:10px"><b>In two lines:</b> ' + nl(b.walkthrough) + '</p>' : '');
         break;
       case 'terms':
         h += '<div class="termflow">' + (b.cards || []).map(function (c, j) {
-          return (j ? '<span class="sep" aria-hidden="true">→</span>' : '') + '<div class="tcard">' + commentBtn(id + '/term/' + j, c.term) + '<span class="term ' + esc(c.cls || 'car') + '">' + esc(c.term) + '</span><b class="tt">' + c.title + '</b><p>' + c.text + '</p>' + (c.example ? '<p class="ex">' + c.example + '</p>' : '') + '</div>';
+          return (j ? '<span class="sep" aria-hidden="true">→</span>' : '') + '<div class="tcard">' + commentBtn(id + '/term/' + j, c.term) + '<span class="term ' + esc(c.cls || 'car') + '">' + esc(c.term) + '</span><b class="tt">' + c.title + '</b><p>' + nl(c.text) + '</p>' + (c.example ? '<p class="ex">' + nl(c.example) + '</p>' : '') + '</div>';
         }).join('') + '</div>';
-        if (b.extra && b.extra.length) h += '<div class="grid2" style="margin-top:14px">' + b.extra.map(function (x, j) { return card(id + '/' + j, '<h3>' + x.title + '</h3><p>' + x.html + '</p>', strip(x.title)); }).join('') + '</div>';
+        if (b.extra && b.extra.length) h += '<div class="grid2" style="margin-top:14px">' + b.extra.map(function (x, j) { return card(id + '/' + j, '<h3>' + x.title + '</h3><p>' + nl(x.html) + '</p>', strip(x.title)); }).join('') + '</div>';
         break;
       case 'traces':
         h += renderCalls(b.calls, id + '/calls');
-        if (b.cards && b.cards.length) h += '<div class="grid2" style="margin-top:14px">' + b.cards.map(function (c, j) { return card(id + '/' + j, '<h3>' + (c.badge ? tag(c.badge) : '') + c.title + '</h3><p>' + c.html + '</p>', strip(c.title)); }).join('') + '</div>';
+        if (b.cards && b.cards.length) h += '<div class="grid2" style="margin-top:14px">' + b.cards.map(function (c, j) { return card(id + '/' + j, '<h3>' + (c.badge ? tag(c.badge) : '') + c.title + '</h3><p>' + nl(c.html) + '</p>', strip(c.title)); }).join('') + '</div>';
         break;
       case 'constraints':
         h += '<div class="tblwrap"><table class="deftable"><tr><th style="width:34%">Constraint</th><th style="width:20%">Applied by</th><th>Keep, or flag</th><th class="ccol"></th></tr>' +
-             b.rows.map(function (r, k) { return '<tr><td>' + r.value + '</td><td>' + r.by + '</td><td>' + (r.badge ? tag(r.badge) : '') + r.text + '</td><td class="ccol">' + commentBtn(id + '/row/' + k, strip(r.value)) + '</td></tr>'; }).join('') + '</table></div>';
+             b.rows.map(function (r, k) { return '<tr><td>' + nl(r.value) + '</td><td>' + nl(r.by) + '</td><td>' + (r.badge ? tag(r.badge) : '') + nl(r.text) + '</td><td class="ccol">' + commentBtn(id + '/row/' + k, strip(r.value)) + '</td></tr>'; }).join('') + '</table></div>';
         break;
       case 'data':
-        h += '<div class="grid2">' + b.cards.map(function (c, j) { return card(id + '/' + j, '<h3>' + (c.badge ? tag(c.badge) : '') + c.title + '</h3>' + c.html, strip(c.title)); }).join('') + '</div>';
+        h += '<div class="grid2">' + b.cards.map(function (c, j) { return card(id + '/' + j, '<h3>' + (c.badge ? tag(c.badge) : '') + c.title + '</h3>' + nl(c.html), strip(c.title)); }).join('') + '</div>';
         break;
       case 'decisions':
         h += renderDecisions(b, id);
@@ -70,7 +80,7 @@
       case 'reused':
         h += card(id, list(b.items), 'Reused'); break;
       default:
-        h += '<div class="grid2' + (b.wide ? ' wide' : '') + '">' + (b.cards || []).map(function (c, j) { return card(id + '/' + j, (c.title ? '<h3>' + c.title + '</h3>' : '') + c.html, strip(c.title || '')); }).join('') + '</div>';
+        h += '<div class="grid2' + (b.wide ? ' wide' : '') + '">' + (b.cards || []).map(function (c, j) { return card(id + '/' + j, (c.title ? '<h3>' + c.title + '</h3>' : '') + nl(c.html), strip(c.title || '')); }).join('') + '</div>';
     }
     return h + '</section>';
   }
@@ -101,17 +111,17 @@
     var h = '';
     if (b.settled && b.settled.length) {
       h += '<h3 class="openhead">' + tag('settled') + 'Decisions taken, and what each follows from</h3><div class="tblwrap"><table class="deftable"><tr><th style="width:38%">Decision</th><th style="width:26%">Follows from</th><th>Considered</th><th class="ccol"></th></tr>' +
-           b.settled.map(function (r, k) { return '<tr><td>' + r.decision + '</td><td>' + r.from + '</td><td>' + (r.considered || '—') + '</td><td class="ccol">' + commentBtn(id + '/settled/' + k, strip(r.decision).slice(0, 60)) + '</td></tr>'; }).join('') + '</table></div>';
+           b.settled.map(function (r, k) { return '<tr><td>' + nl(r.decision) + '</td><td>' + nl(r.from) + '</td><td>' + (nl(r.considered) || '—') + '</td><td class="ccol">' + commentBtn(id + '/settled/' + k, strip(r.decision).slice(0, 60)) + '</td></tr>'; }).join('') + '</table></div>';
     }
     if (b.open && b.open.length) {
       h += '<h3 class="openhead">Open decisions · ' + b.open.length + '</h3><p class="sub">Open an option to read how it works and what it costs. Press <b>Choose</b> to answer. The first option is the author\'s recommendation. When every decision has an answer, copy the response from the bar below; the author moves the answers into the settled table and offers the lock.</p>';
       b.open.forEach(function (d, n) {
         var pick = store.picks[d.id];
-        h += '<div class="dec" id="d-' + esc(d.id) + '" data-dec="' + esc(d.id) + '">' + commentBtn('decision/' + d.id, 'Decision ' + (n + 1) + ' · ' + strip(d.title)) + '<h3>' + tag(pick != null ? 'answered' : 'open') + (n + 1) + ' · ' + d.title + '</h3><p class="ctx">' + d.context + '</p><div class="opts">';
+        h += '<div class="dec" id="d-' + esc(d.id) + '" data-dec="' + esc(d.id) + '">' + commentBtn('decision/' + d.id, 'Decision ' + (n + 1) + ' · ' + strip(d.title)) + '<h3>' + tag(pick != null ? 'answered' : 'open') + (n + 1) + ' · ' + d.title + '</h3><p class="ctx">' + nl(d.context) + '</p><div class="opts">';
         d.options.forEach(function (o, i) {
           var chosen = pick === i;
           h += '<button type="button" class="opt" data-i="' + i + '" aria-expanded="' + (i === 0 && pick == null) + '">' + (i === 0 ? tag('recommended') : '') + o.label + (chosen ? '<span class="pick">✓ your answer</span>' : '') + '</button>' +
-               '<div class="optd' + ((i === 0 && pick == null) || chosen ? ' show' : '') + '"><dl><dt>How</dt><dd>' + o.how + '</dd><dt>Gains</dt><dd>' + o.gains + '</dd><dt>Costs</dt><dd>' + o.costs + '</dd><dt>Effort / risk</dt><dd>' + o.effort + '</dd><dt>Reversible?</dt><dd>' + o.reversible + '</dd></dl><button type="button" class="btn choose" data-i="' + i + '">' + (chosen ? 'Chosen' : 'Choose this option') + '</button></div>';
+               '<div class="optd' + ((i === 0 && pick == null) || chosen ? ' show' : '') + '"><dl><dt>How</dt><dd>' + nl(o.how) + '</dd><dt>Gains</dt><dd>' + nl(o.gains) + '</dd><dt>Costs</dt><dd>' + nl(o.costs) + '</dd><dt>Effort / risk</dt><dd>' + nl(o.effort) + '</dd><dt>Reversible?</dt><dd>' + nl(o.reversible) + '</dd></dl><button type="button" class="btn choose" data-i="' + i + '">' + (chosen ? 'Chosen' : 'Choose this option') + '</button></div>';
         });
         h += '</div></div>';
       });
@@ -158,7 +168,7 @@
     return h;
   }
   function tableHtml(view) {
-    return '<div class="tblwrap"><table class="deftable"><tr>' + view.columns.map(function (c) { return '<th>' + c + '</th>'; }).join('') + '</tr>' + view.rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + c + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>';
+    return '<div class="tblwrap"><table class="deftable"><tr>' + view.columns.map(function (c) { return '<th>' + c + '</th>'; }).join('') + '</tr>' + view.rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + nl(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>';
   }
   function boxSvg(b, node) {
     var cls = b.cls || (node && node.cls) || 'code', title = b.title || (node ? node.title : b.part) || '', sub = b.sub != null ? b.sub : (node && node.sub) || '';
@@ -189,7 +199,7 @@
     return '';
   }
   function portHtml(label, p, dirWord) {
-    return '<div class="port"><h4>' + label + '</h4><ul>' + p.items.map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul><div class="meta"><b>' + dirWord + '</b> ' + (p.from || p.to) + '</div>' + (p.how ? '<div class="meta"><b>How</b> ' + p.how + '</div>' : '') + '</div>';
+    return '<div class="port"><h4>' + label + '</h4><ul>' + p.items.map(function (i) { return '<li>' + nl(i) + '</li>'; }).join('') + '</ul><div class="meta"><b>' + dirWord + '</b> ' + nl(p.from || p.to) + '</div>' + (p.how ? '<div class="meta"><b>How</b> ' + nl(p.how) + '</div>' : '') + '</div>';
   }
   function siblings(id) { var p = parentOf[id]; return Object.keys(N).filter(function (k) { return parentOf[k] === p && k !== mapBlock.root; }); }
 
@@ -198,7 +208,7 @@
     var c = N[id], detail = document.getElementById('detail'), h = '';
     h += '<div class="dt-head"><div><div class="badges">' + (c.badges || []).map(function (b) { return '<span class="bdg ' + esc(b[0]) + '">' + (b[1] ? '<b>' + esc(b[1]) + '</b>' : '') + esc(b[2]) + '</span>'; }).join('') + '</div>';
     h += '<h2>' + esc(c.title) + '</h2></div><div class="dt-actions">' + commentBtn('node/' + id, strip(c.title)) + '<button class="btn" type="button" data-back>← Back</button></div></div>';
-    if (c.one) h += '<p class="one">' + c.one + '</p>';
+    if (c.one) h += '<p class="one">' + nl(c.one) + '</p>';
     var hasPorts = c['in'] || c.out;
     h += '<div class="io' + (hasPorts ? '' : ' noports') + '">' + (c['in'] ? portHtml('Input', c['in'], 'From') : '') +
          '<div class="inside"><div class="cap">Inside · click a part to read about it</div>' + viewHtml(c.view, 'node/' + id) + '<div class="note" id="note" hidden></div></div>' +
@@ -215,7 +225,7 @@
       if (text == null) { note.hidden = true; return; }
       var child = (c.children || {})[name];
       note.hidden = false;
-      note.innerHTML = '<b>' + esc(name) + '.</b> ' + text + (child && N[child] ? '<div><button type="button" class="btn go" data-go="' + esc(child) + '">Open: ' + esc(N[child].title) + ' →</button></div>' : '');
+      note.innerHTML = '<b>' + esc(name) + '.</b> ' + nl(text) + (child && N[child] ? '<div><button type="button" class="btn go" data-go="' + esc(child) + '">Open: ' + esc(N[child].title) + ' →</button></div>' : '');
       bindGo(note);
     }
     var first = detail.querySelector('[data-n]');
@@ -342,8 +352,8 @@
     if (!P) { document.body.innerHTML = '<p style="padding:24px">No plan data: window.PLAN is missing.</p>'; return; }
     init();
     var h = '<div class="wrap"><h1>' + esc(P.title) + (P.status ? (openDecs.length ? '<a class="tag ' + esc(P.status.badge) + '" href="#decisions">' + esc(P.status.text) + '</a>' : tag(P.status.badge, P.status.text)) : '') + '</h1>';
-    if (P.opening) h += '<p class="opening">' + P.opening + '</p>';
-    if (P.examples && P.examples.length) h += '<div class="exstrip" role="note"><b>Examples on this page.</b> ' + (P.examplesNote || '') + P.examples.map(function (e) { return '<span class="exb"><b>' + esc(e.name) + '</b>' + e.text + '</span>'; }).join('') + '</div>';
+    if (P.opening) h += '<p class="opening">' + nl(P.opening) + '</p>';
+    if (P.examples && P.examples.length) h += '<div class="exstrip" role="note"><b>Examples on this page.</b> ' + nl(P.examplesNote) + P.examples.map(function (e) { return '<span class="exb"><b>' + esc(e.name) + '</b>' + nl(e.text) + '</span>'; }).join('') + '</div>';
     h += '<nav class="toc" aria-label="Sections">' + P.blocks.map(function (b, i) { var id = b.id || b.kind + (b.kind === 'section' ? i : ''); var label = b.title && b.kind === 'section' ? b.title : (TOC_TITLES[b.kind] || b.title || b.kind); if (b.kind === 'decisions' && openDecs.length) label += ' · ' + openDecs.length + ' open'; return '<a href="#' + esc(id) + '">' + esc(label) + '</a>'; }).join('') + '</nav>';
     h += P.blocks.map(renderBlock).join('');
     h += '</div>';
