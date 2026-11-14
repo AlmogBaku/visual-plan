@@ -3,7 +3,10 @@ title: Scheduling Sent Messages in PostBox
 status:
   badge: open
   text: 2 decisions open
-opening: 'PostBox sends a message the moment a person presses Send. This page is the design for <b>Send later</b>: the person picks a time, and PostBox sends the message at that time, also when the person is offline. It is new code beside the send path that exists. Click a box to zoom in.'
+opening: |-
+  PostBox sends a message the moment a person presses Send.
+  This page is the design for <b>Send later</b>: the person picks a time, and PostBox sends the message at that time, also when the person is offline. It is new code beside the send path that exists.
+  Click a box to zoom in.
 examplesNote: 'The page uses two people throughout: '
 examples:
   - name: Example (Ann)
@@ -88,7 +91,9 @@ blocks:
           - - code
             - ui
             - one new menu
-        one: The composer gets a Send later menu beside Send. The person picks a time; the composer posts the message with that time. Nothing is sent.
+        one: |-
+          The composer gets a Send later menu beside Send.
+          The person picks a time; the composer posts the message with that time. Nothing is sent.
         in:
           items:
             - the draft
@@ -132,7 +137,9 @@ blocks:
           - - code
             - rule
             - the limit
-        one: 'One route that saves the message with its time and refuses what must not be saved: a time in the past, a message over the limit of the person. It never calls the provider.'
+        one: |-
+          One route that saves the message with its time and refuses what must not be saved: a time in the past, a message over the limit of the person.
+          It never calls the provider.
         in:
           items:
             - the message

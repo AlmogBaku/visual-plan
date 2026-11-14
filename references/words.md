@@ -12,6 +12,10 @@ inside an example are exempt.
   Use the same name for the same thing every time.
 - **Short sentences.** One topic per sentence. 20 words for an instruction, 25 for a description, 6
   sentences per paragraph.
+- **Short summaries, broken where it helps.** A summary (the opening, a node's `one`, a section `sub`) is
+  1 or 2 short sentences. A newline in any text field is a line break on the page; put one where a
+  sentence starts a new point, not after every sentence. Inside `<pre>` and between block tags a newline
+  stays a newline.
 - **Active voice, simple tenses.** "The worker deletes the folder." Not "the folder is deleted". Present,
   past, future; no *has done*, no *is doing*.
 - **No -ing forms** outside technical names. "the clone" not "cloning"; "to delete" not "deleting".
