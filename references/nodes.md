@@ -20,11 +20,14 @@ blocks:                                          # in page order; see below
     …
 ```
 
-Long prose, HTML and SVG go in block scalars, so they read as text and diff as text:
+Long prose, HTML and SVG go in block scalars, so they read as text and diff as text. A newline in a text
+field is a line break on the page, so pick the scalar by what the reader must see: `>-` joins the lines
+into one paragraph, `|-` keeps each line break.
 
 ```yaml
-    one: >-
-      One sentence: what it is and what it does.
+    one: |-
+      What it is, in one short sentence.
+      What it does, on its own line.
     view:
       type: diagram
       svg: |

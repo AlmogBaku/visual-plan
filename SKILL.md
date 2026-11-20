@@ -79,7 +79,9 @@ and the page has no Lock. The explainer's own style rules come from the skill th
 Write in ASD-STE100 Simplified Technical English: one topic per sentence, active voice, present tense,
 *must* and *can*, approved words, no idioms, no -ing forms, no shorthand or lifecycle vocabulary. Use the
 names of the source of truth for every component, field and role, and add an "older words" card when a
-name changed during the work. Say what a thing **is** before what it **does**. `references/words.md`.
+name changed during the work. Say what a thing **is** before what it **does**. Write each summary (the
+opening, a node's `one`, a section `sub`) as 1 or 2 short sentences, and break the line where it helps
+the reader: a newline in a text field is a line break on the page. `references/words.md`.
 
 ## Steps
 
