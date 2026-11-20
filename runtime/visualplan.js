@@ -21,13 +21,13 @@
   function card(key, inner, label) { return '<div class="card">' + commentBtn(key, label || strip(inner).slice(0, 60)) + inner + '</div>'; }
   function strip(h) { var t = document.createElement('div'); t.innerHTML = h; return (t.textContent || '').replace(/\s+/g, ' ').trim(); }
   function list(items) { return '<ul>' + items.map(function (i) { return '<li>' + nl(i) + '</li>'; }).join('') + '</ul>'; }
-  // A newline the author writes in a text field is a line break on the page. Not inside <pre>, and not
+  // A newline the author writes in a text field is a line break on the page. Not inside <pre> or <svg>, and not
   // next to a block tag, so HTML written over several lines renders as before.
-  var BLOCKTAG = '(?:p|div|ul|ol|li|table|tr|td|th|dl|dt|dd|h[1-6]|section|pre|br)\\b';
+  var BLOCKTAG = '(?:p|div|ul|ol|li|table|tr|td|th|dl|dt|dd|h[1-6]|section|pre|br|tbody|thead|tfoot|caption|blockquote|details|summary|figure|hr)\\b';
   var AFTER_BLOCK = new RegExp('(<\\/?' + BLOCKTAG + '[^>]*>)(?:<br>)+', 'gi'), BEFORE_BLOCK = new RegExp('(?:<br>)+(?=<\\/?' + BLOCKTAG + ')', 'gi');
   function nl(s) {
     if (s == null) return '';
-    return String(s).split(/(<pre[\s\S]*?<\/pre>)/i).map(function (part, i) {
+    return String(s).split(/(<pre[\s\S]*?<\/pre>|<svg[\s\S]*?<\/svg>)/i).map(function (part, i) {
       return i % 2 ? part : part.replace(/[ \t]*\n[ \t]*/g, '<br>').replace(AFTER_BLOCK, '$1').replace(BEFORE_BLOCK, '');
     }).join('').replace(/^(?:<br>)+|(?:<br>)+$/g, '');
   }
