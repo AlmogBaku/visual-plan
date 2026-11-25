@@ -38,8 +38,8 @@
     var h = '<section class="block" id="' + esc(id) + '">' + (title ? '<h2 class="sec">' + title + '</h2>' : '') + (b.sub ? '<p class="sub">' + nl(b.sub) + '</p>' : '');
     switch (b.kind) {
       case 'problem':
-        h += '<div class="grid2">' + card(id + '/problem', '<h3>Problem</h3><p>' + nl(b.problem) + '</p>') +
-             card(id + '/today', '<h3>' + esc(b.today.label || 'How it works today') + '</h3>' + list(b.today.items)) + '</div>';
+        h += '<div class="grid2">' + card(id + '/problem', '<h3>Problem</h3><p>' + nl(b.problem) + '</p>', 'Problem') +
+             card(id + '/today', '<h3>' + esc(b.today.label || 'How it works today') + '</h3>' + list(b.today.items), b.today.label || 'How it works today') + '</div>';
         break;
       case 'map':
         h += '<div class="crumbs" id="crumbs"></div><div class="stage"><div id="overview"><div class="ov" data-scroll="scroll sideways →"></div><div class="hint">' +
@@ -76,7 +76,7 @@
         h += (b.inside && b.inside.length ? '<div class="grid2">' + card(id + '/in', '<h3>Also in this plan</h3>' + list(b.inside), 'Also in this plan') + card(id + '/out', '<h3>Not in this plan</h3>' + list(b.outside), 'Not in this plan') + '</div>' : card(id + '/out', '<h3>Not in this plan</h3>' + list(b.outside), 'Not in this plan'));
         break;
       case 'design':
-        h += card(id, '<h3>' + esc(b.file || '') + '</h3><iframe class="design" title="' + esc(b.title || 'Design reference') + '" srcdoc="' + esc(b.srcdoc || '') + '"></iframe>', 'Design reference'); break;
+        h += card(id, '<h3>' + esc(b.file || '') + '</h3><iframe class="design" sandbox="allow-scripts" title="' + esc(b.title || 'Design reference') + '" srcdoc="' + esc(b.srcdoc || '') + '"></iframe>', 'Design reference'); break;
       case 'reused':
         h += card(id, list(b.items), 'Reused'); break;
       default:
